@@ -1,5 +1,4 @@
-const puppeteer = require("puppeteer-core");
-const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer");
 
 module.exports = async (req, res) => {
     if (req.method !== "POST") {
@@ -14,13 +13,29 @@ module.exports = async (req, res) => {
 
     try {
         const browser = await puppeteer.launch({
-            executablePath: await chromium.executablePath(),
-            headless: true,
-            args: chromium.args
+            headless: "new",
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-accelerated-2d-canvas",
+                "--disable-gpu"
+            ]
         });
 
         const page = await browser.newPage();
-        await page.goto(url, { waitUntil: "networkidle2" });
+
+        // **Reduce waiting time by disabling unnecessary resources**
+        await page.setRequestInterception(true);
+        page.on("request", (req) => {
+            if (["image", "stylesheet", "font"].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+
+        await page.goto(url, { waitUntil: "domcontentloaded" });
 
         if (excludeSelectors && Array.isArray(excludeSelectors)) {
             await page.evaluate((selectors) => {
@@ -30,7 +45,12 @@ module.exports = async (req, res) => {
             }, excludeSelectors);
         }
 
-        const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+        // **Reduce PDF generation time by lowering quality**
+        const pdfBuffer = await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" }
+        });
 
         await browser.close();
 
