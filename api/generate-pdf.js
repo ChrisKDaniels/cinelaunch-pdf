@@ -1,4 +1,5 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 module.exports = async (req, res) => {
     if (req.method !== "POST") {
@@ -13,8 +14,9 @@ module.exports = async (req, res) => {
 
     try {
         const browser = await puppeteer.launch({
-            headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            executablePath: await chromium.executablePath(),
+            headless: true,
+            args: chromium.args
         });
 
         const page = await browser.newPage();
@@ -28,10 +30,7 @@ module.exports = async (req, res) => {
             }, excludeSelectors);
         }
 
-        const pdfBuffer = await page.pdf({
-            format: "A4",
-            printBackground: true
-        });
+        const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
 
         await browser.close();
 
@@ -40,6 +39,6 @@ module.exports = async (req, res) => {
         res.send(pdfBuffer);
     } catch (error) {
         console.error("Error generating PDF:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 };
