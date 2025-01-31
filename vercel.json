@@ -1,0 +1,11 @@
+{
+    "version": 2,
+    "functions": {
+      "api/generate-pdf.js": {
+        "runtime": "nodejs18.x"
+      }
+    },
+    "routes": [
+      { "src": "/api/generate-pdf", "dest": "api/generate-pdf.js" }
+    ]
+  }
