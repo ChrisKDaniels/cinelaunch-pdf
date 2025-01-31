@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "api/generate-pdf.js",
+        "use": "@vercel/node@3"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/generate-pdf",
+        "dest": "api/generate-pdf.js"
+      }
+    ]
+  }
