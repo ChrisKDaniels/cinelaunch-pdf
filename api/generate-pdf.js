@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
+const { utapi } = require("@uploadthing/react"); // UploadThing for storage
 
 module.exports = async (req, res) => {
     if (req.method !== "POST") {
@@ -29,7 +30,7 @@ module.exports = async (req, res) => {
 
         const page = await browser.newPage();
 
-        // **Block images, fonts, and stylesheets to speed up page load**
+        // **Speed optimization: Block unnecessary assets**
         await page.setRequestInterception(true);
         page.on("request", (req) => {
             if (["image", "stylesheet", "font"].includes(req.resourceType())) {
@@ -59,10 +60,17 @@ module.exports = async (req, res) => {
 
         await browser.close();
 
-        // **Convert PDF buffer to Base64**
-        const base64PDF = pdfBuffer.toString("base64");
+        // **Upload PDF to UploadThing**
+        const uploadResponse = await utapi.upload({
+            name: `export-${Date.now()}.pdf`,
+            file: pdfBuffer
+        });
 
-        res.json({ pdf: `data:application/pdf;base64,${base64PDF}` });
+        if (!uploadResponse.url) {
+            throw new Error("Upload failed");
+        }
+
+        res.json({ pdfUrl: uploadResponse.url });
     } catch (error) {
         console.error("Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
