@@ -1,20 +1,23 @@
 import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { utapi } from "uploadthing/server";
+import { UTApi } from "uploadthing";
 
-// ✅ Ensure API Keys Exist
-const UPLOADTHING_SECRET = process.env.UPLOADTHING_SECRET;
-const UPLOADTHING_APP_ID = process.env.UPLOADTHING_APP_ID;
+const utapi = new UTApi(); // ✅ Correct way to use UploadThing API
 
-if (!UPLOADTHING_SECRET || !UPLOADTHING_APP_ID) {
-    throw new Error("❌ Missing UploadThing API keys. Make sure they are set in the .env file!");
+// ✅ Debug: Log API Key Variables
+console.log("🔹 UPLOADTHING_SECRET:", process.env.UPLOADTHING_SECRET ? "✅ Loaded" : "❌ MISSING");
+console.log("🔹 UPLOADTHING_APP_ID:", process.env.UPLOADTHING_APP_ID ? "✅ Loaded" : "❌ MISSING");
+
+if (!process.env.UPLOADTHING_SECRET || !process.env.UPLOADTHING_APP_ID) {
+    throw new Error("❌ Missing UploadThing API keys. Check your .env file!");
 }
 
 export default async function handler(req, res) {
     console.log("🔹 API Request Received");
 
     if (req.method !== "POST") {
+        console.error("❌ Method Not Allowed");
         return res.status(405).json({ error: "Method Not Allowed" });
     }
 
@@ -22,6 +25,7 @@ export default async function handler(req, res) {
     console.log("🔹 URL to Process:", url);
 
     if (!url) {
+        console.error("❌ No URL Provided");
         return res.status(400).json({ error: "URL is required" });
     }
 
