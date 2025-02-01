@@ -1,4 +1,3 @@
-import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 import { UploadThing } from "uploadthing"; // ✅ Correct Import
