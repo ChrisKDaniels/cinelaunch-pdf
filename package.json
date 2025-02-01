@@ -4,6 +4,7 @@
   "description": "Serverless function to export PDFs using Puppeteer",
   "main": "api/generate-pdf.js",
   "scripts": {
+    "postinstall": "npm install uploadthing",
     "test": "echo \"Error: no test specified\" && exit 1",
     "vercel-build": "echo 'Building Vercel Function'"
   },
