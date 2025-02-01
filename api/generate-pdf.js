@@ -1,7 +1,7 @@
 import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { UTApi } from "@uploadthing/server"; // ✅ Correct Import for Server
+import { UploadThing } from "uploadthing"; // ✅ Correct Import
 import { execSync } from "child_process";
 
 // 🔍 Log Installed Dependencies Inside Vercel for Debugging
@@ -13,8 +13,8 @@ try {
   console.error("❌ Error Checking Installed Packages:", error.message);
 }
 
-// ✅ Correct way to initialize UploadThing API
-const utapi = new UTApi();
+// ✅ Initialize UploadThing API
+const utapi = new UploadThing({ secret: process.env.UPLOADTHING_SECRET });
 
 // ✅ Debug: Log API Key Variables
 console.log("🔹 UPLOADTHING_SECRET:", process.env.UPLOADTHING_SECRET ? "✅ Loaded" : "❌ MISSING");
@@ -90,19 +90,20 @@ export default async function handler(req, res) {
         await browser.close();
         console.log("✅ PDF Generated Successfully!");
 
-        // **Upload PDF to UploadThing (Using Correct API Call for Server)**
+        // **Upload PDF to UploadThing**
         console.log("🔹 Uploading PDF to UploadThing...");
-        const uploadResponse = await utapi.uploadFiles({
-            files: [{ name: `export-${Date.now()}.pdf`, buffer: pdfBuffer }]
+        const uploadResponse = await utapi.upload({
+            file: pdfBuffer,
+            fileName: `export-${Date.now()}.pdf`
         });
 
-        if (!uploadResponse?.file?.url) {
+        if (!uploadResponse?.url) {
             console.error("❌ Upload Failed:", uploadResponse);
             throw new Error("Upload failed");
         }
 
-        console.log("✅ Upload Successful:", uploadResponse.file.url);
-        res.json({ pdfUrl: uploadResponse.file.url });
+        console.log("✅ Upload Successful:", uploadResponse.url);
+        res.json({ pdfUrl: uploadResponse.url });
     } catch (error) {
         console.error("❌ Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
