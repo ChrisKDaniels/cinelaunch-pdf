@@ -1,16 +1,16 @@
 import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { UTApi } from "uploadthing";
+import { UploadThing } from "uploadthing";
 
-const utapi = new UTApi(); // ✅ Correct way to use UploadThing API
+// ✅ Correct way to initialize UploadThing API
+const utapi = new UploadThing({ secret: process.env.UPLOADTHING_SECRET });
 
 // ✅ Debug: Log API Key Variables
 console.log("🔹 UPLOADTHING_SECRET:", process.env.UPLOADTHING_SECRET ? "✅ Loaded" : "❌ MISSING");
-console.log("🔹 UPLOADTHING_APP_ID:", process.env.UPLOADTHING_APP_ID ? "✅ Loaded" : "❌ MISSING");
 
-if (!process.env.UPLOADTHING_SECRET || !process.env.UPLOADTHING_APP_ID) {
-    throw new Error("❌ Missing UploadThing API keys. Check your .env file!");
+if (!process.env.UPLOADTHING_SECRET) {
+    throw new Error("❌ Missing UploadThing API key. Check your .env file!");
 }
 
 export default async function handler(req, res) {
@@ -80,19 +80,20 @@ export default async function handler(req, res) {
         await browser.close();
         console.log("✅ PDF Generated Successfully!");
 
-        // **Upload PDF to UploadThing**
+        // **Upload PDF to UploadThing (Updated for SDK v7)**
         console.log("🔹 Uploading PDF to UploadThing...");
-        const uploadResponse = await utapi.uploadFiles({
-            files: [{ name: `export-${Date.now()}.pdf`, buffer: pdfBuffer }]
+        const uploadResponse = await utapi.upload({
+            file: pdfBuffer,
+            fileName: `export-${Date.now()}.pdf`
         });
 
-        if (!uploadResponse?.file?.url) {
+        if (!uploadResponse?.url) {
             console.error("❌ Upload Failed:", uploadResponse);
             throw new Error("Upload failed");
         }
 
-        console.log("✅ Upload Successful:", uploadResponse.file.url);
-        res.json({ pdfUrl: uploadResponse.file.url });
+        console.log("✅ Upload Successful:", uploadResponse.url);
+        res.json({ pdfUrl: uploadResponse.url });
     } catch (error) {
         console.error("❌ Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
