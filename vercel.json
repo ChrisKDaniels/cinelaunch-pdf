@@ -1,14 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/generate-pdf.js",
-      "use": "@vercel/node@3",
-      "config": {
-        "installCommand": "npm install --legacy-peer-deps && npm rebuild && npm install @uploadthing/server --force"
-      }
-    }
-  ],
   "routes": [
     {
       "src": "/api/generate-pdf",
