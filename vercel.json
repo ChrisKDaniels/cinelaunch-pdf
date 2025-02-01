@@ -3,19 +3,16 @@
   "builds": [
     {
       "src": "api/generate-pdf.js",
-      "use": "@vercel/node@3"
+      "use": "@vercel/node@3",
+      "config": {
+        "installCommand": "npm install --legacy-peer-deps && npm rebuild && npm install @uploadthing/server --force"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/generate-pdf",
-      "dest": "api/generate-pdf.js",
-      "methods": ["POST"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
+      "dest": "api/generate-pdf.js"
     }
   ]
 }
