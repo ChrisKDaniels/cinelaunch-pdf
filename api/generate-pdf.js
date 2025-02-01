@@ -16,12 +16,20 @@ module.exports = async (req, res) => {
         const browser = await puppeteer.launch({
             executablePath: await chromium.executablePath(),
             headless: true,
-            args: chromium.args
+            args: [
+                ...chromium.args,
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-accelerated-2d-canvas",
+                "--disable-extensions"
+            ]
         });
 
         const page = await browser.newPage();
 
-        // **Speed optimization: Block images, fonts, and stylesheets**
+        // **Block images, fonts, and stylesheets to speed up page load**
         await page.setRequestInterception(true);
         page.on("request", (req) => {
             if (["image", "stylesheet", "font"].includes(req.resourceType())) {
@@ -31,7 +39,7 @@ module.exports = async (req, res) => {
             }
         });
 
-        await page.goto(url, { waitUntil: "domcontentloaded" });
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 10000 });
 
         if (excludeSelectors && Array.isArray(excludeSelectors)) {
             await page.evaluate((selectors) => {
@@ -41,13 +49,20 @@ module.exports = async (req, res) => {
             }, excludeSelectors);
         }
 
-        const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
+        // **Generate PDF**
+        const pdfBuffer = await page.pdf({
+            format: "A4",
+            printBackground: true,
+            timeout: 10000,
+            margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" }
+        });
 
         await browser.close();
 
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", "attachment; filename=export.pdf");
-        res.send(pdfBuffer);
+        // **Convert PDF buffer to Base64**
+        const base64PDF = pdfBuffer.toString("base64");
+
+        res.json({ pdf: `data:application/pdf;base64,${base64PDF}` });
     } catch (error) {
         console.error("Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
