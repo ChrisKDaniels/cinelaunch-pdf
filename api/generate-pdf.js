@@ -1,7 +1,7 @@
 import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { UploadThing } from "uploadthing";
+import { UTApi } from "@uploadthing/server";
 import { execSync } from "child_process";
 
 // Log installed dependencies inside Vercel
@@ -14,7 +14,7 @@ try {
 }
 
 // ✅ Correct way to initialize UploadThing API
-const utapi = new UploadThing({ secret: process.env.UPLOADTHING_SECRET });
+const utapi = new UTApi();
 
 // ✅ Debug: Log API Key Variables
 console.log("🔹 UPLOADTHING_SECRET:", process.env.UPLOADTHING_SECRET ? "✅ Loaded" : "❌ MISSING");
