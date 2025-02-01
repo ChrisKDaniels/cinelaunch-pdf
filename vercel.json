@@ -1,15 +1,21 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "api/generate-pdf.js",
-        "use": "@vercel/node@3"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/generate-pdf.js",
+      "use": "@vercel/node@3"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/generate-pdf",
+      "dest": "api/generate-pdf.js",
+      "methods": ["POST"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
       }
-    ],
-    "routes": [
-      {
-        "src": "/api/generate-pdf",
-        "dest": "api/generate-pdf.js"
-      }
-    ]
-  }
+    }
+  ]
+}
