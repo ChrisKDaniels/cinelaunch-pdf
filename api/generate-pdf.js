@@ -1,7 +1,7 @@
 require("dotenv").config(); // Load .env variables
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
-const { utapi } = require("@uploadthing/server");
+const { utapi } = require("uploadthing");
 
 // **Manually Load API Keys from .env File**
 const UPLOADTHING_SECRET = process.env.UPLOADTHING_SECRET;
