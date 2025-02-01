@@ -1,12 +1,12 @@
 import "dotenv/config"; // Load .env variables
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { UTApi } from "@uploadthing/server";
+import { UTApi } from "@uploadthing/server"; // ✅ Correct Import for Server
 import { execSync } from "child_process";
 
-// Log installed dependencies inside Vercel
+// 🔍 Log Installed Dependencies Inside Vercel for Debugging
 try {
-  console.log("🔍 Checking Installed Dependencies...");
+  console.log("🔍 Checking Installed Dependencies Inside Vercel...");
   const installedPackages = execSync("npm list --depth=0").toString();
   console.log(installedPackages);
 } catch (error) {
@@ -90,20 +90,19 @@ export default async function handler(req, res) {
         await browser.close();
         console.log("✅ PDF Generated Successfully!");
 
-        // **Upload PDF to UploadThing (Updated for SDK v7)**
+        // **Upload PDF to UploadThing (Using Correct API Call for Server)**
         console.log("🔹 Uploading PDF to UploadThing...");
-        const uploadResponse = await utapi.upload({
-            file: pdfBuffer,
-            fileName: `export-${Date.now()}.pdf`
+        const uploadResponse = await utapi.uploadFiles({
+            files: [{ name: `export-${Date.now()}.pdf`, buffer: pdfBuffer }]
         });
 
-        if (!uploadResponse?.url) {
+        if (!uploadResponse?.file?.url) {
             console.error("❌ Upload Failed:", uploadResponse);
             throw new Error("Upload failed");
         }
 
-        console.log("✅ Upload Successful:", uploadResponse.url);
-        res.json({ pdfUrl: uploadResponse.url });
+        console.log("✅ Upload Successful:", uploadResponse.file.url);
+        res.json({ pdfUrl: uploadResponse.file.url });
     } catch (error) {
         console.error("❌ Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
