@@ -5,7 +5,8 @@
       "src": "api/generate-pdf.js",
       "use": "@vercel/node",
       "config": {
-        "installCommand": "npm install --legacy-peer-deps && npm rebuild && npm install uploadthing --force"
+        "includeFiles": ["node_modules/**"],
+        "installCommand": "npm install --force uploadthing"
       }
     }
   ],

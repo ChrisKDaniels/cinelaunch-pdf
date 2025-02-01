@@ -3,13 +3,21 @@ import chromium from "@sparticuz/chromium";
 import { UploadThing } from "uploadthing"; // ✅ Correct Import
 import { execSync } from "child_process";
 
-// 🔍 Log Installed Dependencies Inside Vercel for Debugging
+// 🚨 Check & Install Dependencies at Runtime
 try {
   console.log("🔍 Checking Installed Dependencies Inside Vercel...");
   const installedPackages = execSync("npm list --depth=0").toString();
   console.log(installedPackages);
+
+  if (!installedPackages.includes("uploadthing")) {
+    console.log("🚨 `uploadthing` NOT FOUND! Installing it now...");
+    execSync("npm install uploadthing --force", { stdio: "inherit" });
+    console.log("✅ `uploadthing` Installed Successfully!");
+  } else {
+    console.log("✅ `uploadthing` Already Installed!");
+  }
 } catch (error) {
-  console.error("❌ Error Checking Installed Packages:", error.message);
+  console.error("❌ Error Checking or Installing Packages:", error.message);
 }
 
 // ✅ Initialize UploadThing API
