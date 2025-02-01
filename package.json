@@ -10,13 +10,12 @@
   "keywords": [],
   "author": "Chris K. Daniels",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "engines": {
     "node": "18.x"
   },
   "dependencies": {
     "@sparticuz/chromium": "^132.0.0",
-    "@uploadthing/react": "^7.1.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "puppeteer": "^24.1.1",
