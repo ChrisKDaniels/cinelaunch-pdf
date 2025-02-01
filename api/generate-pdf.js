@@ -1,6 +1,16 @@
+require("dotenv").config(); // Load .env variables
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
-const { utapi } = require("@uploadthing/react"); // UploadThing for storage
+const { utapi } = require("@uploadthing/server");
+
+// **Manually Load API Keys from .env File**
+const UPLOADTHING_SECRET = process.env.UPLOADTHING_SECRET;
+const UPLOADTHING_APP_ID = process.env.UPLOADTHING_APP_ID;
+
+// **Ensure API Keys Exist**
+if (!UPLOADTHING_SECRET || !UPLOADTHING_APP_ID) {
+    throw new Error("Missing UploadThing API keys. Make sure they are set in the .env file!");
+}
 
 module.exports = async (req, res) => {
     if (req.method !== "POST") {
@@ -61,16 +71,15 @@ module.exports = async (req, res) => {
         await browser.close();
 
         // **Upload PDF to UploadThing**
-        const uploadResponse = await utapi.upload({
-            name: `export-${Date.now()}.pdf`,
-            file: pdfBuffer
+        const uploadResponse = await utapi.uploadFiles({
+            files: [{ name: `export-${Date.now()}.pdf`, buffer: pdfBuffer }]
         });
 
-        if (!uploadResponse.url) {
+        if (!uploadResponse?.file?.url) {
             throw new Error("Upload failed");
         }
 
-        res.json({ pdfUrl: uploadResponse.url });
+        res.json({ pdfUrl: uploadResponse.file.url });
     } catch (error) {
         console.error("Error generating PDF:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
